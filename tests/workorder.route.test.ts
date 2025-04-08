@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express from 'express';
-import router from '../routes/workOrder.route';
-import * as validationService from '../services/validation.service';
+import router from '../src/routes/workOrder.route';
+import * as validationService from '../src/services/validation.service';
 
-jest.mock('../services/workorder.service', () => ({
+jest.mock('../src/services/workorder.service', () => ({
     updateWorkOrderDueDate: jest.fn()
 }));
 
-jest.mock('../services/validation.service', () => ({
+jest.mock('../src/services/validation.service', () => ({
     validateMaintainXWebhook: jest.fn(() => true)
 }));
 

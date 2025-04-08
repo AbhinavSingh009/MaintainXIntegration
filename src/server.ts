@@ -1,7 +1,7 @@
 import express from "express";
 import * as dotenv from "dotenv";
-import workorderRoute from "../routes/workOrder.route";
-import purchaseOrderRoute from "../routes/purchaseOrder.route";
+import workorderRoute from "./routes/workOrder.route";
+import purchaseOrderRoute from "./routes/purchaseOrder.route";
 
 dotenv.config();
 

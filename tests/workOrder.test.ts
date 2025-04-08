@@ -1,4 +1,4 @@
-import { calculateDueDate } from '../services/workOrder.service';
+import { calculateDueDate } from '../src/services/workOrder.service';
 
 describe('calculateDueDate', () => {
     it('should return a valid future ISO date for low priority', () => {
