@@ -129,14 +129,14 @@ export const syncPurchaseOrder = async (req: express.Request): Promise<void> => 
 };
 
 export const syncExistingPurchaseOrder =  async (req: express.Request): Promise<void> => {
-    console.log('Existing Purchase Order');
+    console.log('Existing Purchase Order', req.body);
     const headers = getHeaders();
-    let coupaURL = `https://merchantX.coupahost.com/api/purchase_orders/${req.body.purchaseOrder.purchaseOrderId}`;
+    let coupaURL = `https://merchantX.coupahost.com/api/purchase_orders/${req.body.purchaseOrderId}`;
     let coupa_purchase_order_data;
     try{
         if(req.body.newPurchaseOrder.status === 'CANCELED') {
             coupa_purchase_order_data = {"cancel": true};
-            coupaURL = `https://merchantX.coupahost.com/api/purchase_orders/${req.body.purchaseOrder.purchaseOrderId}/cancel`;
+            coupaURL = `https://merchantX.coupahost.com/api/purchase_orders/${req.body.purchaseOrderId}/cancel`;
         } else {
             coupa_purchase_order_data = mapMaintainXToCoupa(data);
         }

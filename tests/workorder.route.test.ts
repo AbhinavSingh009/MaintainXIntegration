@@ -39,19 +39,14 @@ describe('POST /workorder/update', () => {
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty('Something went wrong');
     });
-
-    describe('POST /workorder/update', () => {
-        it('should return 401 if signature is invalid', async () => {
-            (validationService.validateMaintainXWebhook as jest.Mock).mockReturnValueOnce(false);
-
-            const response = await request(app).post('/workorder/update').send({
-                workOrderId: 123,
-                newWorkOrder: { priority: 'low' },
-                orgId: 456
-            });
-
-            expect(response.status).toBe(401);
-            expect(response.body).toEqual({ "Something went wrong": "Invalid signature" });
+    it('should return 401 if signature is invalid', async () => {
+        (validationService.validateMaintainXWebhook as jest.Mock).mockReturnValueOnce(false);
+        const response = await request(app).post('/workorder/update').send({
+            workOrderId: 123,
+            newWorkOrder: { priority: 'low' },
+            orgId: 456
         });
-    });
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({ "Something went wrong": "Invalid signature" });
+        });
 });
