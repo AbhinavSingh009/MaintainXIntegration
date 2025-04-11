@@ -108,9 +108,6 @@ export const syncPurchaseOrder = async (req: express.Request): Promise<void> => 
     const coupaURL = `https://merchantX.coupahost.com/api/purchase_orders`;
     const headers = getHeaders();
     const coupa_purchase_order_data = mapMaintainXToCoupa(data);
-
-    console.log('The new data is ', coupa_purchase_order_data);
-
     const maxRetries = 3;
     let attempt = 0;
 
@@ -126,13 +123,13 @@ export const syncPurchaseOrder = async (req: express.Request): Promise<void> => 
                 throw new Error(`Failed to sync PO after ${maxRetries} attempts`);
             }
 
-            await new Promise((res) => setTimeout(res, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
         }
     }
 };
 
 export const syncExistingPurchaseOrder =  async (req: express.Request): Promise<void> => {
-
+    console.log('Existing Purchase Order');
     const headers = getHeaders();
     let coupaURL = `https://merchantX.coupahost.com/api/purchase_orders/${req.body.purchaseOrder.purchaseOrderId}`;
     let coupa_purchase_order_data;

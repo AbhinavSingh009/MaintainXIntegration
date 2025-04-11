@@ -29,16 +29,15 @@ export const  mapMaintainXToCoupa = (purchaseData: any) => {
         "ship-to-address": mapShippingAddress(po.shippingAddress),
         "supplier": mapVendor(po),
         "payment-term": {
-            "code": "Net 30" // Default, can be customized
+            "code": "Net 30"
         },
         "shipping-term": {
-            "code": "Standard" // Default shipping term
+            "code": "Standard"
         },
         "order-lines": {
             "order-line": po.items.map(mapOrderLine)
         }
     };
-
 
     return coupaOrder;
 }
