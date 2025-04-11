@@ -11,7 +11,7 @@ const handleError = (err: any, res: express.Response, status: number) => {
 
 router.post('/', async (req: express.Request, res: express.Response): Promise<void> => {
     console.log('New Order Request');
-    const MAINTAINX_NEW_WORK_ORDER = process.env.MAINTAINX_NEW_WORK_ORDER_UPDATE || '';
+    const MAINTAINX_NEW_WORK_ORDER = process.env.MAINTAINX_NEW_WORK_ORDER || '';
     await processWorkOrderRequest(req, res, MAINTAINX_NEW_WORK_ORDER)
 
 }) ;
@@ -30,11 +30,12 @@ async function processWorkOrderRequest(req: express.Request, res: express.Respon
         }
 
         const { workOrderId, newWorkOrder, orgId } = req.body;
+        const startDate = req.body.newWorkOrder.startDate;
         if(!workOrderId || !newWorkOrder || !orgId) {
             handleError('Missing Information', res, 400);
         }
-
-        await updateWorkOrderDueDate(workOrderId, newWorkOrder.priority, orgId);
+        console.log('The Start Date is ', startDate);
+        await updateWorkOrderDueDate(workOrderId, newWorkOrder.priority, orgId, startDate);
 
         res.status(200).json({ message: "Work order updated successfully" });
     } catch(error: any) {

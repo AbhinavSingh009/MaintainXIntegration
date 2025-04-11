@@ -1,5 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import {start} from "node:repl";
 dotenv.config();
 
 const priority_list: Record<string, number> = {
@@ -9,10 +10,16 @@ const priority_list: Record<string, number> = {
     high: 1
 }
 
-export const calculateDueDate = (priority: string): string => {
+export const calculateDueDate = (priority: string, startDate: string): string => {
 
-    const currentDate = new Date();
+    console.log("Start date", startDate);
+    let currentDate = new Date();
     const priorityDate = priority_list[priority.toLowerCase()];
+
+    if(startDate) {
+        currentDate  = new Date(startDate);
+    }
+
     if (!priorityDate) {
         throw new Error(`Invalid priority: ${priority}`);
     }
@@ -22,10 +29,10 @@ export const calculateDueDate = (priority: string): string => {
     return  currentDate.toISOString();
 }
 
-export const updateWorkOrderDueDate =  async (workOrderID:number, priority: string, orgID: number): Promise<void> => {
+export const updateWorkOrderDueDate =  async (workOrderID:number, priority: string, orgID: number, startDate: string): Promise<void> => {
 
     const maintainXURL = `https://api.getmaintainx.com/v1/workorders/${workOrderID}`;
-    const body = { dueDate: calculateDueDate(priority) };
+    const body = { dueDate: calculateDueDate(priority, startDate) };
     const headers = {
         'Authorization': `Bearer ${process.env.MAINTAINX}`,
         'x-organization-id': orgID.toString(),

@@ -1,83 +1,86 @@
-type MaintainXPurchaseOrder = {
-    purchaseOrder: {
-        overrideNumber: string;
-        status: string;
-        dueDate: string;
-        note: string;
-        vendorId: number;
-        shippingAddress: Address;
-        billingAddress: Address;
-        items: MaintainXItem[];
-        extraFields?: Record<string, string>;
+export const  mapMaintainXToCoupa = (purchaseData: any) => {
+    console.log('The prochase data is ',purchaseData);
+    const po = purchaseData.purchaseOrder;
+    const now = new Date().toISOString();
+    const coupaOrder = {
+        "acknowledged-flag": false,
+        "created-at": now,
+        "status": "issued",
+        "transmission-status": "sent_via_email",
+        "updated-at": now,
+        "version": 1,
+        "exported": false,
+        "received": false,
+        "created-by": {
+            "email": "system@maintainx.com",
+            "firstname": "System",
+            "lastname": "Integration",
+            "login": "system_integration"
+        },
+        "requisition-header": {
+            "id": po.id || 0,
+            "requester": {
+                "email": po.creatorId ? `user${po.creatorId}@company.com` : "system@maintainx.com",
+                "firstname": "MaintainX",
+                "lastname": "User",
+                "login": `mxuser${po.creatorId || 'system'}`
+            }
+        },
+        "ship-to-address": mapShippingAddress(po.shippingAddress),
+        "supplier": mapVendor(po),
+        "payment-term": {
+            "code": "Net 30" // Default, can be customized
+        },
+        "shipping-term": {
+            "code": "Standard" // Default shipping term
+        },
+        "order-lines": {
+            "order-line": po.items.map(mapOrderLine)
+        }
     };
-};
 
-type Address = {
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-};
 
-type MaintainXItem = {
-    name: string;
-    quantityOrdered: number;
-    unitCost: number;
-    partExtraFields?: {
-        "Part Number"?: string;
-    };
-};
+    return coupaOrder;
+}
 
-type CoupaPurchaseOrder = {
-    purchase_order: {
-        po_number: string;
-        status: string;
-        notes: string;
-        need_by_date: string;
-        supplier: {
-            id: number;
-        };
-        ship_to_address: Address;
-        bill_to_address: Address;
-        order_lines: CoupaOrderLine[];
-    };
-};
-
-type CoupaOrderLine = {
-    line_num: number;
-    description: string;
-    quantity: number;
-    price: number;
-    item: {
-        number: string;
-    };
-};
-
-export const mapMaintainXToCoupaPO = (mxPO: MaintainXPurchaseOrder): CoupaPurchaseOrder  => {
-
-    const po = mxPO.purchaseOrder;
+// Helper functions
+function mapShippingAddress(address: any) {
+    if (!address) return null;
 
     return {
-        purchase_order: {
-            po_number: po.overrideNumber,
-            status: mapStatus(po.status),
-            notes: po.note,
-            need_by_date: po.dueDate.split("T")[0], // Trim time if ISO string
-            supplier: {
-                id: po.vendorId
-            },
-            ship_to_address: {...po.shippingAddress},
-            bill_to_address: {...po.billingAddress},
-            order_lines: po.items.map((item, index) => ({
-                line_num: index + 1,
-                description: item.name,
-                quantity: item.quantityOrdered,
-                price: item.unitCost,
-                item: {
-                    number: item.partExtraFields?.["Part Number"] || "UNKNOWN"
-                }
-            }))
+        "city": address.city || "",
+        "postal-code": address.postalCode || "",
+        "state": address.state || "",
+        "street1": address.street || "",
+        "country": {
+            "code": address.country ? address.country.substring(0, 2).toUpperCase() : "US",
+            "name": address.country || "United States"
+        }
+    };
+}
+
+function mapVendor(po: any) {
+    return {
+        "name": po.vendorId ? `Vendor ${po.vendorId}` : "Unknown Vendor",
+        "number": po.vendorId || "0000",
+        "primary-address": mapShippingAddress(po.billingAddress || po.shippingAddress)
+    };
+}
+
+function mapOrderLine(item: any, index: any) {
+    return {
+        "accounting-total": item.price * (item.quantityOrdered || 1),
+        "description": item.name || "MaintainX Item",
+        "line-num": index + 1,
+        "price": item.price || item.unitCost || 0,
+        "quantity": item.quantityOrdered || 1,
+        "total": item.price * (item.quantityOrdered || 1),
+        "account": {
+            "code": "01-100-8000", // Default account code
+            "name": "Maintenance Supplies" // Default account name
+        },
+        "commodity": {
+            "name": "Maintenance Parts" // Default commodity
         }
     };
 }

@@ -3,7 +3,6 @@ import crypto from "crypto";
 
 export const validateMaintainXWebhook = (req: express.Request, secret: string): boolean => {
     try {
-
         const headerSignature = req.header('x-maintainx-webhook-body-signature');
         if (!headerSignature) {
             console.error('Missing signature header');

@@ -1,6 +1,6 @@
 import express from 'express';
 import {validateMaintainXWebhook} from '../services/validation.service';
-import {syncPurchaseOrder, syncStatusPurchaseOrder, syncExistingPurchaseOrder} from '../services/purchaseOrder.service';
+import {syncPurchaseOrder} from '../services/purchaseOrder.service';
 const router = express.Router();
 
 interface workOrderRequest  {
@@ -9,9 +9,8 @@ interface workOrderRequest  {
     orgId: number;
 }
 
-const handleError = (err: any, res: express.Response, status: number) => {
+const handleError = (err: any, res: express.Response, status: any) => {
     console.log(err);
-    res.status(status).json({"Something went wrong": err});
 }
 
 router.post('/', async (req: express.Request, res: express.Response): Promise<void> => {
@@ -23,19 +22,19 @@ router.post('/', async (req: express.Request, res: express.Response): Promise<vo
 router.post('/update', async (req: express.Request, res: express.Response): Promise<void> => {
     const MAINTAINX_NEW_PURCHASE_ORDER_CHANGE = process.env.MAINTAINX_NEW_PURCHASE_ORDER_CHANGE || '';
     console.log('Purchase order update method');
-    await processPurchaseOrderRequest(req, res, MAINTAINX_NEW_PURCHASE_ORDER_CHANGE, syncExistingPurchaseOrder);
+    await processPurchaseOrderRequest(req, res, MAINTAINX_NEW_PURCHASE_ORDER_CHANGE, syncPurchaseOrder);
 });
 
-router.post('/status', async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log('Purchase order status method');
-    const MAINTAINX_NEW_PURCHASE_ORDER_STATUS = process.env.MAINTAINX_NEW_PURCHASE_ORDER_STATUS || '';
-    await processPurchaseOrderRequest(req, res, MAINTAINX_NEW_PURCHASE_ORDER_STATUS, syncStatusPurchaseOrder );
-});
+// router.post('/status', async (req: express.Request, res: express.Response): Promise<void> => {
+//     console.log('Purchase order status method');
+//     const MAINTAINX_NEW_PURCHASE_ORDER_STATUS = process.env.MAINTAINX_NEW_PURCHASE_ORDER_STATUS || '';
+//     await processPurchaseOrderRequest(req, res, MAINTAINX_NEW_PURCHASE_ORDER_STATUS, syncStatusPurchaseOrder );
+// });
 
 async function processPurchaseOrderRequest(req: express.Request, res: express.Response, secret: string, callFunction: any): Promise<void> {
     try {
 
-        console.log(req.body);
+        console.log('Syncing Purchase Order');
 
         if (!validateMaintainXWebhook(req, secret)) {
             return handleError('Invalid signature', res, 401);
@@ -47,7 +46,8 @@ async function processPurchaseOrderRequest(req: express.Request, res: express.Re
 
         console.log('Order updated successfully');
     } catch(error: any) {
-        handleError('This is failed',res, error?.status);
+        console.error(error);
+        handleError(error,res, 400);
     }
 }
 
